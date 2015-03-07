@@ -5,26 +5,12 @@
 \usepackage{indentfirst}
 \usepackage{default}
 \usepackage{graphicx}
-\usepackage{listings}
 \usepackage{inconsolata}
 \usepackage[T1]{fontenc}
 \usepackage{color}
 \definecolor{bluekeywords}{rgb}{0.13,0.13,1}
 \definecolor{greencomments}{rgb}{0,0.5,0}
 \definecolor{redstrings}{rgb}{0.9,0,0}
-
-\lstset{language=C,
-  showspaces=false,
-  showtabs=false,
-  breaklines=true,
-  showstringspaces=false,
-  breakatwhitespace=true,
-  escapeinside={(*@}{@*)},
-  commentstyle=\color{greencomments},
-  keywordstyle=\color{bluekeywords},
-  stringstyle=\color{redstrings},
-  basicstyle=\footnotesize\ttfamily
-}
 
 \begin{document}
 
@@ -35,22 +21,22 @@
         \vskip.2in
         \textsc{\LARGE Wydział Elektroniki}
         \vskip.2in
-        \Large Projekt zaliczeniowy
+        \Large Projekt zespołowy
         \vskip1.5in
-        \emph{\huge Sterowanie robotem mobilnym}
+        \emph{\huge Sterowanie robotem mobilnym Jaguar}
     \end{center}
 
     \vskip1.4in
 
     \begin{minipage}{.50\textwidth}
         \begin{flushleft}
-            \bfseries\large Prowadzący:\par \emph{Dr inż. Krzysztof Halawa}
+            \bfseries\large Prowadzący:\par \emph{Dr inż. Krzysztof Arent}
         \end{flushleft}
     \end{minipage}
     %\hskip.4\textwidth
     \begin{minipage}{.45\textwidth}
         \begin{flushright}
-            \bfseries\large Student:\par \emph{Adam Balawender}
+            \bfseries\large Studenci:\par \emph{...}
         \end{flushright}
     \end{minipage}
 
@@ -61,255 +47,9 @@
     \Large Rok \the\year
 
 
-    %    \author[Balawender]{Adam Balawender}
-    %    \title{Metoda Gaussa}
-    %    \institute[PWr]{Politechnika Wrocławska}
-    %    \date[PTM2 2015]{Podstawy techniki mikroprocesorowej - 18 stycznia 2015}
 \end{titlepage}
 
-\section{Pierwotne założenia}
-\subsection{Autonomiczna platforma mobilna z systemem wizyjnym}
-Jako pełen ambicji i początkowosemestralnej werwy młody człowiek zaplanowałem budowę systemu wizyjnego opartego o kamerę OV7670 oraz jednostkę BeagleBone Black. Zdając sobie sprawę z wymagań pamięciowych i obliczeniowych cyfrowej analizy obrazu, postanowiłem skorzystać z PRU - koprocesorów czasu rzeczywistego w BeagleBone Black. Są to dwa rdzenie ARM taktowane 200MHz, powinny mieć zatem wystarczające. Moduł kamery OV7670 nie posiada zintegrowanego bufora danych, co wymusza obsługę danych na bierząco. Zgodnie z dokumentacją, najniższa obsługiwana rozdzielczość to 40x30 przy 4 bajtach na piksel i 30 klatkach na sekundę. Iloczyn tych wartości wynosi niespełna 141kB/s. Na obsługę jednego bajta przypada zatem 6.94us. Przy częstotliwości taktowania procesora 200MHz i architekturze ARM, na wykonanie większości z zestawu poleceń potrzeba 5-10ns, powinien więc z łatwością podołać zadaniu.
-\subsection{Napotkane trudności}
-Pierwszą z nich okazało się podłaczenie kamery - piny IO kamery działają na napięciu 3.0V, BBB na 3.3V. Zastosowałem maksymę "najwyżej kupię drugą" i zignorowałem ten problem, prawdopodobnie kosztem czasu życia sensora. Drugą z trudności okazała się obsługa protokołu komunikacyjnego kamery - SCCB. Jego przebiegi do złudzenia przypominają I\textsuperscript{2}C, różnica polega na ignorowaniu obecnych w I\textsuperscript{2}C sygnałów ACK. Rozwiązanie problemu zajęło mi dosyć dużo czasu i polegało na niestandardowej konfiguracji interfejsu. Z kilku przetestowanych bibliotek tylko jednej udało się nawiązać komunikację z sensorem. Pozostało zatem najtrudniejsze - odczyt obrazu z kamery. Wyciągając wnioski z ilości czasu, który zajął mi poprzedni problem, postanowiłem wstrzymać pracę nad obsługą kamery i przygotować coś znacznie mniej złożonego...
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{6740_ov.jpg}
-    \caption{I2C vs SCCB (źródło: http://e2e.ti.com)}
-\end{figure}
-\section{Wtóre założenia}
-\subsection{Miniprojekty wykorzystujące I\textsuperscript{2}C, SPI, PWM i ADC}
-\subsubsection{BeagleBone Black}
-Pozbawiony złudzeń i z okrojonymi ambicjami postanowiłem zbudować układ wyświetlający prostokąt na OLED, oraz przesuwający go w kierunku przeciwnym do nachylenia płytki względem Ziemi. Posłużyłem się wyświetlaczem opartym na sterowniku SSD1306 oraz akcelerometrem ADXL345. Na mózg operacji wybrałem, ponownie, BeagleBone Black - tym razem na głównym procesorze, z poziomu interpretera języka Python. Przez swoją prostotę i elastyczność, Python sprawdza się w podobnych zastosowaniach znakomicie. Podobny program napisany na kontroler serii AVR byłby pewnie znacznie bardziej czasochłonny. Mając już podłączony kontroler, postanowiłem wykorzystać jeszcze podczerwieniowy czujnik odległości 4-30cm firmy SHARP z wyjściem analogowym. Wyjście to, przez dzielnik napięcia, podłączone zostało do przetwornika ADC w BeagleBone Black. Charakterystyka czujnika jest nieliniowa, więc uzyskanie dokładnego pomiaru wymagałoby zamodelowania charakterystyki. Dla mnie jednak duża dokładność nie miała znaczenia i wystarczającym przybliżeniem okazała się funkcja \[ d(x) = 2.7/x \]. 
-\subsubsection{ATxMega 128A3U}
-Chcąc zaprezentować umiejętności programowania na niższym poziomie postanowiłem wykorzystać nowoczesny procesor z rodziny AVR, zbudowałem prosty moduł z diodą cyfrową WS2812 i dwoma silnikami DC. Jako wzmacniacz mocy dla silników zastosowałem układ DRV8833. Ze względu na rygorystyczne ograniczenia czasowe w sterowaniu diody, część odpowiedzialną za ustawianie koloru napisałem w asemblerze. Później znalazłem opracowania, w których opisano jak skorzystać z bogatego wyposażenia ATxMegi i sterować diodami za pomocą UART i DMA. Jest to szczególnie użyteczne przy sterowaniu macierzami diód (czekając na sygnał końca transmisji dioda działa jak bufor - po załadowania może przekazywać bity kolejnym diodom w łańcuchu). W moich edukacyjno-poznawczych celach mogę sobie pozwolić na zablokowanie procesora na krótką chwilę, aby przesłać dane przełączając wyjścia "ręcznie". Sygnały PWM dla sterownika silników generowane są sprzętowo, a ustawione za pomocą funkcji z biblioteki ASF - Atmel Software Framework. Mimo początkowych trudności z kompilacją, biblioteka jest przydatna do prototypowania - oszczędza czasu który spędziłbym na przeszukiwaniu dokumentacji i szukaniu przykładów. Zainspirowany możliwościami biblioteki i uzytego procesora, ustawiłem go tak, aby udawał terminal szeregowy, przez który możemy sterować kolorem diody i prędkością obrotową silników z poziomu komputera. Możliwość realizacji tego rozwiązania dostarczyła mi wiele radości. Do BeagleBone Black mogę zalogować się przez interfejs sieciowy, używając SSH. Ale możliwość udawania urządzeń USB ze znacznie niższego poziomu - poziomu procesora AVR - dostarcza więcej uciechy. Być może w niedalekiej przyszłości, gdy uda mi się uruchomić system wizyjny z kamerą, będę potrafił odtworzyć ruch dłoni z obrazu i przetwarzać go na ruch myszy w czasie rzeczywistym. Zadanie wydaje mi się możliwe do zrealizowania.
-\section{Nabyte umiejętności}
-Miałem okazję zagłębić się w implementacje najpopularniejszych interfejsów komunikacyjnych, poznać różnice między nimi i nauczyć się dobierać właściwy. Przeczytałem setki stron dokumentacji technicznych, ćwicząc przy okazji znajomość technicznego słownictwa w języku angielskim. Zapoznałem się z możliwościami posiadanych przeze mnie procesorów, w szczególności sprzętowej obsługi protokołów komunikacyjnych, DMA, re-routowaniem pinów, przerwaniami i zagadnieniami związanymi z dostępem do pamięci. Nauczyłem się pisać programy w asemblerze i rozróżniać architektury procesorów. 
-\section{Kod programu dla ATxMegi}
 
-\begin{lstlisting}
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#define F_CPU 32000000UL
-#include <util/delay.h>
-#include <asf.h>
-#include <pwm.h>
-#include "conf_usb.h"
-
-typedef struct {
-    uint8_t red, green, blue, _offset;
-} color_t;
-
-void set_color(uint32_t input) {
-
-    color_t *color = (color_t*)&input;
-    // 40 ticks per single bit
-    // short time is 11 ticks
-    // long itme is 29 ticks
-
-    // zero:    13+27
-    // one:     26+14
-    // 1600 ticks after GBR is sent
-
-    PORTF.DIR = 0xFF; // F port as output
-
-    volatile uint8_t hi=0xFF, lo=0, bit=8;
-    const volatile uint8_t *port=&(PORTF.OUT);
-
-    volatile uint8_t *ptr=(uint8_t*)color, cur=*ptr++, next=lo, count=3;
-
-    //pre: bit>0
-    __asm__ volatile (
-        "write_bit40:"          "\n\t"
-        "st %a[port], %[hi]"    "\n\t" // 2     T = 0   port = hi;
-        "sbrc   %[cur], 7"      "\n\t" //       if(cur & 127)
-        "mov    %[next], %[hi]"     "\n\t" // 2     T = 2       next = hi;
-        "dec    %[bit]"         "\n\t" // 1 T = 3   bit--;
-        "rjmp   .+0"            "\n\t" // 2 T = 6
-        "rjmp   .+0"            "\n\t" // 2 T = 8
-        "rjmp   .+0"            "\n\t" // 2 T = 10
-        "rjmp   .+0"            "\n\t" // 2 T = 12
-        "st %a[port], %[next]"  "\n\t" // 2 T = 14  port = next;
-        "mov    %[next], %[lo]"     "\n\t" // 1 T = 15  next = lo;
-        "breq   nextbyte40"     "\n\t" // 1-2   T = 16  if(bit == 0) goto nextbyte40;
-        "rjmp   .+0"            "\n\t" // 2 T = 18
-        "mov    %[next], %[lo]"     "\n\t" // 1 T = 19  next = lo;
-        "rol    %[cur]"         "\n\t" // 1     T = 20  cur <<= 1;
-        "rjmp   .+0"            "\n\t" // 2 T = 22
-        "rjmp   .+0"            "\n\t" // 2 T = 24
-        "rjmp   .+0"            "\n\t" // 2 T = 26
-        "st %a[port], %[lo]"    "\n\t" // 2 T = 28  port = lo;
-        "rjmp   .+0"            "\n\t" // 2 T = 30
-        "rjmp   .+0"            "\n\t" // 2 T = 32
-        "rjmp   .+0"            "\n\t" // 2 T = 34
-        "rjmp   .+0"            "\n\t" // 2 T = 36
-        "rjmp   .+0"            "\n\t" // 2 T = 38
-        "rjmp   write_bit40"        "\n\t" // 2 T = 40
-
-        "nextbyte40:"           "\n\t" //   T = 17
-        "ldi    %[bit], 8"      "\n\t" // 1 T = 18  bit = 8;
-        "ld %[cur], %a[ptr]+"   "\n\t" // 2 T = 20  cur = *ptr++;
-        "rjmp   .+0"            "\n\t" // 2 T = 22
-        "rjmp   .+0"            "\n\t" // 2 T = 24
-        "rjmp   .+0"            "\n\t" // 2 T = 26
-        "st %a[port], %[lo]"    "\n\t" // 2 T = 28  port = lo;
-        "rjmp   .+0"            "\n\t" // 2 T = 30
-        "rjmp   .+0"            "\n\t" // 2 T = 32
-        "rjmp   .+0"            "\n\t" // 2 T = 34
-        "rjmp   .+0"            "\n\t" // 2 T = 36
-        "sbiw   %[count], 1"        "\n\t" // 2 T = 38  count--;
-        "brne   write_bit40"        "\n\t" // 2     if(count != 0) goto write_bit40;
-
-        : [cur]     "+r" (cur),
-          [bit]     "+r" (bit),
-          [next]    "+r" (next),
-          [count]   "+w" (count)
-
-        : [port]    "e" (port),
-          [ptr]     "e" (ptr),
-          [hi]      "r" (hi),
-          [lo]      "r" (lo) );
-}
-
-uint32_t hsv_to_rgb (unsigned char h, unsigned char s, unsigned char v )
-{
-    uint8_t r=0,g=0,b=0, i, f;
-    uint32_t p, q, t;
-
-    if( s == 0 ) {
-        r = g = b = v;
-    }
-    else
-    {   i=h/43;
-        f=h%43;
-        p = (v * (255 - s))/256;
-        q = (v * ((10710 - (s * f))/42))/256;
-        t = (v * ((10710 - (s * (42 - f)))/42))/256;
-
-        switch( i )
-        {   case 0: r = v; g = t; b = p; break;
-            case 1: r = q; g = v; b = p; break;
-            case 2: r = p; g = v; b = t; break;
-            case 3: r = p; g = q; b = v; break;
-            case 4: r = t; g = p; b = v; break;
-            case 5: r = v; g = p; b = q; break;
-        }
-    }
-    color_t ret;
-    ret.red = r;
-    ret.blue = b;
-    ret.green = g;
-    return *(uint32_t*)&ret;
-}
-int main(void)
-{
-    struct pwm_config pwm_cfg[4];
-
-    sysclk_init();
-
-    pwm_init(&pwm_cfg[0], PWM_TCE0, PWM_CH_A, 500); /* PE0 */
-    pwm_init(&pwm_cfg[1], PWM_TCE0, PWM_CH_B, 500); /* PE1 */
-    pwm_init(&pwm_cfg[2], PWM_TCE0, PWM_CH_C, 500); /* PE0 */
-    pwm_init(&pwm_cfg[3], PWM_TCE0, PWM_CH_D, 500); /* PE1 */
-
-    pwm_start(&pwm_cfg[0], 0);
-    pwm_start(&pwm_cfg[1], 0);
-    pwm_start(&pwm_cfg[2], 0);
-    pwm_start(&pwm_cfg[3], 0);
-
-
-
-    PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
-    sei();
-
-    udc_start();
-    char h = 128, s = 128, v = 128, a = 0, b = 0;
-
-    while (1)
-    {
-        char ch;
-        if (udi_cdc_is_rx_ready())
-         {
-            ch = udi_cdc_getc();
-            switch(ch)
-            {
-                case 'i': {
-                              unsigned char i = 0;
-                              char c = 1;
-                              for(; i < 255; ++i ) {
-                                  set_color( hsv_to_rgb( i, s, v ) );
-                                  _delay_ms( 5 );
-                              }
-                              break;
-                          }
-                case 'h': {
-                              char *q = "Set h [0-7]\n\r";
-                              udi_cdc_write_buf(q, 13);
-                              h = (udi_cdc_getc()-'0')<<5;
-                              set_color( hsv_to_rgb(h, s, v) );
-                              _delay_ms( 1 );
-                              break;
-                          }
-                case 's': {
-                              char *q = "Set s [0-7]\n\r";
-                              udi_cdc_write_buf(q, 13);
-                              s = (udi_cdc_getc()-'0')<<5;
-                              set_color( hsv_to_rgb(h, s, v) );
-                              _delay_ms( 1 );
-                              break;
-                          }
-                case 'v': {
-                              char *q = "Set v [0-7]\n\r";
-                              udi_cdc_write_buf(q, 13);
-                              v = (udi_cdc_getc()-'0')<<5;
-                              set_color( hsv_to_rgb(h, s, v) );
-                              _delay_ms( 1 );
-                              break;
-                          }
-                case 'z': {
-                              a = 0; b = 0;
-                              pwm_set_duty_cycle_percent(&pwm_cfg[0], a);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[1], b);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[2], a);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[3], b);
-                              break;
-                          }
-                case 'p': {
-                              if( !a && !b ) a=7;
-                              a += 1;
-                              b = 0;
-                              pwm_set_duty_cycle_percent(&pwm_cfg[0], a);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[1], b);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[2], a);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[3], b);
-                              break;
-                          }
-                case 'r': {
-                              pwm_set_duty_cycle_percent(&pwm_cfg[0], 0);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[1], 0);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[2], 0);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[3], 0);
-                              _delay_ms(200);
-                              char tmp = a;
-                              a = b;
-                              b = tmp;
-                              pwm_set_duty_cycle_percent(&pwm_cfg[0], a);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[1], b);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[2], a);
-                              pwm_set_duty_cycle_percent(&pwm_cfg[3], b);
-                              break;
-                          }
-                default : udi_cdc_write_buf("O co chodzi?\n\r", 14); break;
-            };
-         }
-    }
-}
-\end{lstlisting}
-\begin{figure}
-    \centering
-    \includegraphics{microcontrollers_neopixel_datasheet_timing.png}
-    \caption{Protokół komunikacyjny z diodą WS2812}
-\end{figure}
-
+\input{test.tex}
 
 \end{document}
