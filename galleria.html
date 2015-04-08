@@ -2,13 +2,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Jaguar Home Page</title>
+<title>Jaguar Gallery</title>
 <meta name="keywords" content="Consultant Template, XHTML/CSS website layout, free download" />
 <meta name="description" content="Download Consultant Template, XHTML/CSS website layout provided by templatemo.com" />
 <link href="stylesheets/templatemo_style.css" rel="stylesheet" type="text/css" />
+<link rel="Stylesheet" type="text/css" href="stylesheets/galeria.css" />
+
 <link href="stylesheets/featuredcontentglider.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="javascripts/jquery-1.2.2.pack.js"></script>
+<script type="text/javascript" src="javascripts/galeria.js"></script>
 <script type="text/javascript" src="javascripts/featuredcontentglider.js">
+
 /***********************************************
 * Featured Content Glider script- (c) Dynamic Drive DHTML code library (www.dynamicdrive.com)
 * Visit http://www.dynamicDrive.com for hundreds of DHTML scripts
@@ -18,10 +22,16 @@
 </head>
 <body>
 
+
+
 <div id="templatemo_container">
 	<div id="templatemo_top_panel">
     	<div id="logo">
-        </div>       
+        </div>
+		
+		
+		
+       
 		
 		<div id="aaa" class="glidecontenttoggler">
 		
@@ -35,7 +45,6 @@
 		</div>
         
     </div> <!-- end of top panel -->
-	
 
     <div id="templatemo_content">
 	
@@ -46,7 +55,7 @@ featuredcontentglider.init({
 	contentclass: "glidecontent",
 	togglerid: "p-select",
 	remotecontent: "", //Get gliding contents from external file on server? "filename" or "" to disable
-	selected: 0,
+	selected: 1,
 	persiststate: true,
 	speed: 1000,
 	direction: "rightleft", //set direction of glide: "updown", "downup", "leftright", or "rightleft"
@@ -66,19 +75,38 @@ featuredcontentglider.init({
     
         <div id="canadaprovinces" class="glidecontentwrapper">
 		
-		  
+		  <div class="glidecontent"> <!-- start of page 2 (Home cd )-->
+            
+				<div class="header_01">Witaj w galleri filmów projektu Jaguar - c.d</div>
+           
+                				 
+<iframe width="320" height="240" src="https://www.youtube.com/embed/8AUh5remuJ4" frameborder="0" allowfullscreen></iframe>
+
+				
+					
+					
+					
+           </div><!-- end of page 2 -->
         
             <div class="glidecontent"><!-- start of page 2 ( Home )-->
             
-            	<div class="header_01">Witaj na stronie projektu zespołowego Jaguar</div>
+            	<div class="header_01">Witaj w galleri zdjęć projektu Jaguar</div>
                 
-                <div class="image_wrapper image_wrapper_fl">
-                	<img src="images/templatemo_image_01.jpg" alt="image" />
-                </div>
-               <p class="em_text">Celem realizacji projektu jest dołożenie własnej cegiełki do rozwoju robotyki. Zagadnieniem, którym będziemy się zajmować jest robot mobilny Jaguar, należący do Politechniki Wrocławskiej. Jest to robot nowo zakupiony przez uczelnię w roku 2014. Efektem czego, nikt we Wrocławiu nie miał okazji ani możliwości jego obsługi. </a> </p> 
-                <p>Realizując ten projekt, będziemy pierwsi którzy się tego podejmą i przetrą szlaki kolejnym grupom badawczym. Obsługą i praktycznym wykorzystaniem Jaguara zainteresowana jest również firma Neurosoft. Dzięki temu nasza praca nie musi być czysto akademicka, lecz może również uzupełnić pewną lukę w przemyśle. Jest to ewidentny dowód na to, że produkt, którym chcemy się zająć, jest innowacyjny i stwarza duże pole do popisu. Celem projektu jest zrealizowanie algorytmu sterowania robotem mobilnym typu Jaguar. Początkowo w wersji uproszczonej -> „transport z punktu A do punktu B”. </p>
-                <p>Gdy wspomniana wersja zakończy się sukcesem, przewidujemy wraz z firma Neurosoft wyposażyć Jaguara w laser 3D. W naszych zamysłach jest, aby zrealizować algorytm "samodzielnego, bezpiecznego przejeżdżania przez ulicę”. We wspomnianym problemie, robot powinien zauważyć zbliżający się samochód i właściwie zareagować. Oczywiście pomysł ten trzeba będzie skonfrontować z firmą, która dostarczy drogi sprzęt i być może będzie mieć inne plany z jego wykorzystaniem. Problem nasz ociera się o problem „unikania zderzeń” (opis słowny: Wyobraźmy sobie że jesteśmy na lotnisku Heathrow i patrzymy na ludzi z lotu ptaka. Wydawać by się mogło, że wszyscy poruszają się w losowym kierunku tworząc wielki bałagan. Ciekawe jest, że każdy, często zmieniając kierunek ruchu dociera do celu nie zderzywszy się wcześniej z nikim. Jak to możliwe?).</p>
-              
+             
+				
+				<script type="text/javascript">
+// <![CDATA[
+var galeria = new Galeria('galeria', new Array(
+	
+	new Array('images/JM1.jpg', 'images/J1.jpg', 'Robot Jaguar', 'Jaguar-4x4 Wheel Robotic Mobile Platform jest robotem przeznaczonym do pracy wewnątrz jak i na zewnątrz. Platforma ta jest wersja na kółkach platformy Jaguar-Lite, napędzana jest przez cztery potężne silniki (80W), po jednym dla każdego koła. Robot ten jest bardzo wytrzymały, lekki (<20 kg), oraz szybki (max 11 km / h).'),
+	new Array('images/JM2.jpg', 'images/J2.jpg', 'Robot Jaguar', 'Jaguar jest robotem odpornym na zmianę  warunków pogodowych oraz jest wodoodporny. Przeznaczony jest do pracy w trudnych terenach i zdolny  jest do wspinania się  na niewielkie przeszkody o wysokości nie więcej niż 11cm (np. schody). '),
+	new Array('images/JM3.jpg', 'images/J3.jpg', 'Robot Jaguar', 'Jaguar-4x4 Wheels  jest w pełni bezprzewodową platformą, posiadająca w sobie moduł GPS jak  i 9 DOF IMU (Autopilot / Akcelerometr / Kompas) dla autonomicznej nawigacji. Zintegrowana wysokiej rozdzielczości kamera oraz opcjonalny skaner laserowy zapewniają dostarczenie operatorowi szczegółowych informacje o otoczeniu.'),
+		new Array('images/JM4.jpg', 'images/J4.jpg', 'Robot Jaguar', 'Oprócz gotowego do użycia oprogramowania ustąpionego przez firmę Dr Robot służącego do kontroli i nawigacji, robot zawiera pełny zestaw do programowania SDK, dostępne są protokoły danych oraz przykładowe kody.')
+	
+), 'stylesheets/galeria2.css');
+// ]]>
+</script>
+             
                 
                 
             </div> <!-- end of page 1-->
