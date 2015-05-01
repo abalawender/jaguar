@@ -5,8 +5,8 @@
 
 function Galeria(id, zdjecia, css, ochrona, zaladuj)
 {
-	this.kolumny = 3;
-	this.naStronie = 10;
+	this.kolumny = 5;
+	this.naStronie = 15;
 	
 	
 	this.id = id;
