@@ -1,0 +1,40 @@
+\subsection{Opis standardu wiadomości GPS robota}
+Robot Jaguar posiada moduł pracujący i publikujący wiadomości w standardzie NMEA 0183. Komunikacja odbywa się przy użyciu protokołu RS232, aczkolwiek w robocie komunikacja ta została przeprowadzona przez TCP. W tej sytuacji, aby nasłuchał dane publikowane przez moduł, należało połączyć się z robotem (jego routerem), a następnie jak w trakcie zwykłej komunikacji szeregowej podejrzeć wysyłane dane. W trakcie testu wewnątrz budynku, niestety okazało się, że jedna z paczek dedykowanych temu typu komunikacji alarmowała nas o niepowodzeniu w trakcie parsowania wiadomości. Dopiero wyprowadzenie robota na zewnątrz budynku poskutkowało uzupełnieniem pustych pól wiadomości. Poniżej zaprezentowany został fragment danych otrzymywanych od GPS-a robota:
+\begin{verbatim}
+$GPGSV,2,2,08,25,36,137,41,26,44,300,46,29,64,069,46,31,00,000,20*72
+
+$GPRMC,162747.6,A,5106.54375,N,01703.59396,E,000.01,122.2,290515,004.1,E*55
+
+$GPGGA,162747.6,5106.54375,N,01703.59396,E,1,06,1.5,231.0,M,41.8,M,,*53
+
+$GPGSA,A,3,05,16,20,,25,26,29,,,,,,2.6,1.5,2.1*39
+
+$GPGSV,2,1,08,05,25,067,36,16,16,306,33,20,29,090,45,21,00,000,41*76
+
+$GPGSV,2,2,08,25,36,137,41,26,44,300,46,29,64,069,46,31,00,000,20*72
+\end{verbatim}
+
+\subsubsection{Format wiadomości NMEA}
+Powyższe komunikaty informują o następujących cechach:
+\begin{itemize}
+\item \textbf{GPGSV} - informacja o satelitach, ich ilości, położenie, moc sygnału
+\item \textbf{GPRMC} - informacje o poprawności pozycji, określenie położenia, wskaźnik trybu obliczeñ
+\item \textbf{GPGSA} - informacje o obniżeniu precyzji podanej pozycji (horyzontalnie oraz wertykalnie).
+\item \textbf{GPGGA} - wysokość i szerokość geograficzna, informacja czy wynik jest estymowany, obniżenie precyzji pomiaru
+\end{itemize}
+
+
+\subsection{Opis paczek GPS i nawigacji}
+Poniżej zostały krótko opisane paczki, które obsługują GPS lub nawigację:
+\begin{itemize}
+\item \textbf{nmea\_navsat\_driver} - paczka wydaje się odpowiednią do wykorzystania dla robota Jaguar, ponieważ zainstalowany moduł GPS publikuje informacje w formacie NMEA 0183. Paczkę wykorzystuje się jako interfejs, który parsuje dane wejściowe od modułu GPS i zwraca je w postaci prostych wiadomości. Może być połączona z pakietem geographic\_info, który może posłużyć do obsługi nawigacji. Uruchomiony węzeł publikuje na topikach:
+	\begin{verbatim}
+		sensor_msgs/NavSatFix - pozycja GPS
+		geometry_msgs/TwistStamped - prędkość wyznaczona przez GPS
+		sensor_msgs/TimeReference - czas z GPS-a
+	\end{verbatim}
+Pakiet udostępnia węzeł, umożliwiający odczyt danych z portu szeregowego (nmea\_serial\_driver).
+
+\item \textbf{navigation\_stack} - paczka oferuje algorytm nawigacji bazujący na odczycie z czujnika laserowego. Sterowanie odbywa się na bazie załadowanej mapy. Informacje nt. odczytu z laseru muszą być publikowane w wiadomościach sensor\_msgs/LaserScan. Dodatkowo należy publikować informacje o położeniu (odometria) przy użyciu \textit{tf} i wiadomości nav\_msgs/Odometry. Wynik nawigowania zostanie w takiej sytuacji wysłany przy użyciu wiadomości geometry\_msgs/Twist. W tej sytuacji trzeba zadbać o to, aby wiadomość miała przełożenie na ruch robota. Ostatecznie mapa nie musi być stworzona i dostępna dla paczki, aczkolwiek istnieją tutoriale na stronach wiki ROS-a, które tłumaczą w jaki sposób zaimplementować obsługę wcześniej wygenerowanej mapy.   
+\item \textbf{robot\_localization} - Paczka może się przydać do wyznaczania bieżącej lokalizacji robota. Daje możliwość połączenia odczytu z wielu sensorów i na ich podstawie wyestymowania położenia i orientacji, w której znajduje się robot. Zaletą paczki jest to, że współpracuje z wieloma typami wiadomości i sensorów i można do niej podłączyć nieograniczoną liczbę czujników. W przypadku robota Jaguara ocenę położenia można uzyskać przy pomocy modułu GPS, kamery, modułu IMU prz użyciu tej paczki. 
+\end{itemize}
