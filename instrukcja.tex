@@ -1,0 +1,91 @@
+\section{Raport K1 - Instrukcja wdrożenia robota Jaguar}
+Instalację ROS Indigo przeprowadzono na systemie operacyjnym \textbf{Ubuntu 14.04.1}, analogiczne kroki dla wersji \textbf{Ubuntu 12.04} i dystrybucji ROS Hydro również dały pożądane rezultaty.
+\begin{enumerate}
+\item[1)] Instalacja ROS Indigo zgodnie z instrukcją - \href{http://wiki.ros.org/indigo/Installation/Ubuntu}{link}. Po wykonaniu wszystkich kroków należy jeszcze wprowadzić:
+	\begin{verbatim}
+ 	echo "source /opt/ros/indigo/setup.bash" >> ~/.bashrc
+ 	\end{verbatim}
+\item[2)] Przygotowanie środowiska pracy dla systemu ROS, zgodnie z instrukcją dla wersji \textit{catkin} - \href{http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment}{link}. Po wykonaniu wszystkich kroków również należy wprowadzić jeszcze:
+	\begin{verbatim}
+	echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+	\end{verbatim}
+\item[3)] Pobranie paczek z oprogramowaniem robota Jaguar do folderu \textit{\textasciitilde/catkin\_ws/src} - komendy:
+	\begin{verbatim}
+	cd ~/catkin_ws/src/
+	git clone https://github.com/gitdrrobot/DrRobotMotionSensorDriver
+	git clone https://github.com/gitdrrobot/drrobot_jaguar4x4_player
+	\end{verbatim}
+\item[4)] Kompilacja paczki \textit{DrRobotMotionSensorDriver}:
+	\begin{verbatim}
+	cd ~/catkin_ws/src/DrRobotMotionSensorDriver/
+	cmake .
+ 	\end{verbatim}
+\item[5)] Wstępna kompilacja paczki \textit{drrobot\_jaguar4x4\_player} - aby wykonać ten krok należy edytować plik \textit{CMakeLists.txt} z folderu paczki poprzez zakomentowanie wszystkich linii zaczynających się od \textit{add\_executable} oraz \textit{target\_link\_libraries} (powinno ich być po cztery), a~następnie wykonać komendy:
+	\begin{verbatim}
+	cd ~/catkin_ws/
+	catkin_make
+	\end{verbatim}
+\item[6)] Ponowna kompilacja paczki \textit{drrobot\_jaguar4x4\_player} - w tym celu należy przywrócić do stanu pierwotnego zakomentowane w poprzednim punkcie linie pliku \textit{CMakeLists.txt} paczki i potem wywołać:
+	\begin{verbatim}
+	cd ~/catkin_ws/
+	catkin_make
+	\end{verbatim}
+\item[7)] Pobranie i kompilacja paczki do obsługi joysticka:
+	\begin{verbatim}
+	cd ~/catkin_ws/src/
+	git clone https://github.com/ros-drivers/joystick_drivers
+	mv joystick_drivers/joy .
+	rm -rf joystick_drivers/
+	cd ..
+	catkin_make
+	\end{verbatim}
+\item[8)] Pobranie węzła potrzebnego do sterowania robota za pomocą joysticka Logitech:
+	\begin{verbatim}
+	cd ~/catkin_ws/src/drrobot_jaguar4x4_player/src
+	git clone https://github.com/cowiekmaupa/jaguar_joy_teleop_pwr
+	mv jaguar_joy_teleop_pwr/drrobot_joy_teleop.cpp .
+	rm -rf jaguar_joy_teleop_pwr
+	\end{verbatim}
+\newpage
+\item[9)] Dopisanie nowego węzła do pakietu \textit{drrobot\_jaguar4x4\_player}. Aby to zrobić należy dokonać pewnych zmian w pliku \textit{CMakeLists.txt} paczki  - w sekcji \textbf{\#\#Declare a cpp executable} dopisać linię:
+	\begin{verbatim}
+	add_executable(drrobot_jaguar4x4_joy_teleop_node src/drrobot_joy_teleop.cpp)
+	\end{verbatim}
+	oraz następnie w sekcji \textbf{\#\#Specify libraries to link a library or executable target against} dopisać:
+	\begin{verbatim}
+	target_link_libraries(drrobot_jaguar4x4_joy_teleop_node ${catkin_LIBRARIES})
+	\end{verbatim}
+\item[10)] Kompilacja paczki:
+	\begin{verbatim}
+	cd ~/catkin_ws/
+	catkin_make
+	\end{verbatim}
+\item[11)] Instalacja programu potrzebnego do odczytu danych z GPS:
+	\begin{verbatim}
+	sudo apt-get install socat
+	\end{verbatim}
+\end{enumerate}
+Przed próbą uruchomienia robota należy upewnić się, że jest on włączony, komputer jest wyposażony w kartę WiFi (bądź połączony z robotem przewodem) oraz w porcie USB komputera jest poprawnie zainstalowany adapter od joysticka Logitech. Następne kroki są następujące:
+\begin{enumerate}
+\item[1)] Aby nawiązać połączenie należy ręcznie ustawić statyczne IP komputera (np. 192.168.0.101) i podłączyć się do sieci robota (np. DriJaguar2).
+\item[2)] W pierwszym oknie terminala należy uruchomić węzeł nadrzędny.
+	\begin{verbatim}
+	roscore
+	\end{verbatim}
+\item[3)] W drugim oknie terminala należy uruchomić główny węzeł robota, odpowiedzialny za połączenie z węzłem nadrzędnym.
+	\begin{verbatim}
+	rosrun drrobot_jaguar4x4_player drrobot_jaguar4x4_player_node
+	\end{verbatim}
+\item[4)] W trzecim oknie terminala należy uruchomić węzeł odpowiedzialny za połączenie joysticka z węzłem nadrzędnym.
+	\begin{verbatim}
+	rosrun joy joy_node
+	\end{verbatim}
+\item[5)] W czwartym oknie terminala należy uruchomić węzeł odpowiedzialny za sterowania robotem za pomocą joysticka.
+	\begin{verbatim}
+	rosrun drrobot_jaguar4x4_player drrobot_jaguar4x4_joy_teleop_node
+	\end{verbatim}
+\item[6)] W kolejnych oknach terminala można śledzić dowolny topic przy użyciu \textit{rostopic} lub podglądać dane zwracane przez GPS dzięki poleceniu:
+	\begin{verbatim}
+	socat pty,link=serial,waitslave tcp:192.168.0.61:10002
+	\end{verbatim}
+\end{enumerate}
