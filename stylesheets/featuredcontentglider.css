@@ -1,7 +1,7 @@
 .glidecontentwrapper{
 position: relative; /* Do not change this value */
-width: 950px;
-height: 560px; /* Set height to be able to contain height of largest content shown*/
+width: 1000px;
+height: 610px; /* Set height to be able to contain height of largest content shown*/
 overflow: hidden;
 margin: 60px 40px;
 }
@@ -16,7 +16,7 @@ margin: 60px 40px;
 position: absolute; /* Do not change this value */
 background: #1a1d1e;
 visibility: hidden;
-width: 950px;
+width: 1000px;
 }
 /*
  Total glidecontent width: 330px+10px+10px=350px
